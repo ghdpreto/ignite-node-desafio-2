@@ -1,4 +1,5 @@
 - [X] Deve ser possível criar um usuário
+- [X] Deve ser possível fazer login
 - [ ] Deve ser possível identificar o usuário entre as requisições
 - [ ] Deve ser possível registrar uma refeição feita, com as seguintes informações
     - Nome

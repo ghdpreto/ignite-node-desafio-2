@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify'
 import z from 'zod'
 import { knex } from '../database'
+import { randomUUID } from 'crypto'
 
 export async function usuariosRoutes(app: FastifyInstance) {
   app.post('/', async (request, reply) => {
@@ -21,8 +22,32 @@ export async function usuariosRoutes(app: FastifyInstance) {
     }
 
     // criar o usuario
-    await knex('usuarios').insert({ email, nome, senha })
+    await knex('usuarios').insert({ email, nome, senha, id: randomUUID() })
 
     return reply.status(201).send()
+  })
+
+  app.post('/login', async (request, reply) => {
+    // validar os dados
+    const loginUsuarioBodySchema = z.object({
+      email: z.string().email(),
+      senha: z.string(),
+    })
+
+    const { email, senha } = loginUsuarioBodySchema.parse(request.body)
+
+    // busca o usuario
+    const usuario = await knex('usuarios')
+      .select('id', 'nome')
+      .where({ email, senha })
+      .first()
+
+    if (!usuario) {
+      return reply.status(400).send({ mensagem: 'Usuário / senha inválidos' })
+    }
+
+    return {
+      usuario,
+    }
   })
 }
