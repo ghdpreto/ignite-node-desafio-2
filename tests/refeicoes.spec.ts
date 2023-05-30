@@ -79,7 +79,7 @@ describe('Refeicoes routes', () => {
     ])
   })
 
-  test.only('Deve ser possível visualizar uma única refeição', async () => {
+  test('Deve ser possível visualizar uma única refeição', async () => {
     const idUsuario = usuarioLogado.get('Set-Cookie')
 
     await request(app.server)
@@ -208,5 +208,60 @@ describe('Refeicoes routes', () => {
       .set('Cookie', idUsuario)
 
     expect(refeicaoDeletadaResponse.statusCode).toEqual(404)
+  })
+
+  test('Deve ser possível listar metricas de refeições', async () => {
+    const idUsuario = usuarioLogado.get('Set-Cookie')
+
+    const refeicoes = [
+      {
+        nome: 'REFEICAO-1',
+        dieta: true,
+        dtCriacao: new Date().toISOString(),
+      },
+      {
+        nome: 'REFEICAO-2',
+        dieta: true,
+        dtCriacao: new Date().toISOString(),
+      },
+      {
+        nome: 'REFEICAO-3',
+        dieta: false,
+        dtCriacao: new Date().toISOString(),
+      },
+      {
+        nome: 'REFEICAO-4',
+        dieta: false,
+        dtCriacao: new Date().toISOString(),
+      },
+      {
+        nome: 'REFEICAO-5',
+        dieta: true,
+        dtCriacao: new Date(
+          new Date().getTime() + 1000 * 60 * 60 * 24,
+        ).toISOString(),
+      },
+    ]
+
+    for await (const refeicao of refeicoes) {
+      await request(app.server)
+        .post('/refeicoes')
+        .send(refeicao)
+        .set('Cookie', idUsuario)
+    }
+
+    const metricasResponse = await request(app.server)
+      .get('/refeicoes/metricas')
+      .set('Cookie', idUsuario)
+
+    expect(metricasResponse.statusCode).toEqual(200)
+    expect(metricasResponse.body.metricas).toEqual(
+      expect.objectContaining({
+        registradas: 5,
+        dentroDaDieta: 3,
+        foraDaDieta: 2,
+        melhorSequencia: 2,
+      }),
+    )
   })
 })

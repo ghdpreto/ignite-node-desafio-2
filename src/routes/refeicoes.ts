@@ -34,10 +34,10 @@ export async function refeicoesRoutes(app: FastifyInstance) {
 
   app.put('/:id', async (request, reply) => {
     const refeicaoBodySchema = z.object({
-      nome: z.string(),
+      nome: z.string().optional(),
       descricao: z.string().optional(),
-      dieta: z.boolean(),
-      dtCriacao: z.string().datetime(),
+      dieta: z.boolean().optional(),
+      dtCriacao: z.string().datetime().optional(),
     })
 
     const refeicaoParamsSchema = z.object({
@@ -126,5 +126,48 @@ export async function refeicoesRoutes(app: FastifyInstance) {
     }
 
     return { refeicao: refeicaoResponse }
+  })
+
+  app.get('/metricas', async (request, reply) => {
+    const { idUsuario } = request.cookies
+
+    const totalRefeicoesRegistrada = await knex('refeicoes')
+      .count('*', { as: 'registradas' })
+      .where({ id_usuario: idUsuario })
+      .first()
+
+    const refeicoesDentroDieta = await knex('refeicoes')
+      .select('*')
+      .where({ id_usuario: idUsuario, dieta: true })
+      .orderBy('dt_criacao', 'desc')
+
+    const totalRefeicoesForaDieta = await knex('refeicoes')
+      .count('*', { as: 'foraDaDieta' })
+      .where({ id_usuario: idUsuario, dieta: false })
+      .first()
+
+    const melhorSequencia = await knex
+      .max('qnt', { as: 'melhorSequencia' })
+      .from(
+        knex
+          .count('dieta', { as: 'qnt' })
+          .from('refeicoes')
+          .where({ id_usuario: idUsuario, dieta: true })
+          .groupBy('dt_criacao'),
+      )
+      .first()
+
+    const totalRefeicoesDentroDieta = {
+      dentroDaDieta: refeicoesDentroDieta.length,
+    }
+
+    return {
+      metricas: {
+        ...totalRefeicoesRegistrada,
+        ...totalRefeicoesDentroDieta,
+        ...totalRefeicoesForaDieta,
+        ...melhorSequencia,
+      },
+    }
   })
 }
