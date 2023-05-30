@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify'
+import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import z from 'zod'
 import { knex } from '../database'
 import { randomUUID } from 'crypto'
@@ -6,6 +6,19 @@ import { checkUsuarioLogado } from '../middlewares/check-usuario-logado'
 
 export async function refeicoesRoutes(app: FastifyInstance) {
   app.addHook('preHandler', checkUsuarioLogado)
+  app.addHook(
+    'preHandler',
+    async function (request: FastifyRequest, reply: FastifyReply) {
+      const { idUsuario } = request.cookies
+      const existeUsuario = await knex('usuarios')
+        .select()
+        .where({ id: idUsuario })
+        .first()
+      if (!existeUsuario) {
+        return reply.status(401).send({ mensagem: 'Não autorizado' })
+      }
+    },
+  )
 
   app.post('/', async (request, reply) => {
     const refeicaoBodySchema = z.object({
