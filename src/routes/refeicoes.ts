@@ -74,6 +74,23 @@ export async function refeicoesRoutes(app: FastifyInstance) {
     return reply.status(200).send({ refeicao: { ...refeicaoAtualizado } })
   })
 
+  app.delete('/:id', async (request, reply) => {
+    const refeicaoParamsSchema = z.object({ id: z.string().uuid() })
+
+    const { id } = refeicaoParamsSchema.parse(request.params)
+    const { idUsuario } = request.cookies
+
+    const registroDeletado = await knex('refeicoes')
+      .del()
+      .where({ id, id_usuario: idUsuario })
+
+    if (registroDeletado <= 0) {
+      return reply.status(404).send()
+    }
+
+    return reply.status(204).send()
+  })
+
   app.get('/', async (request, reply) => {
     const { idUsuario } = request.cookies
 
@@ -89,5 +106,25 @@ export async function refeicoesRoutes(app: FastifyInstance) {
     })
 
     return { refeicoes: refeicoesResponse }
+  })
+
+  app.get('/:id', async (request, reply) => {
+    const { idUsuario } = request.cookies
+
+    const refeicaoParamsSchema = z.object({ id: z.string().uuid() })
+
+    const { id } = refeicaoParamsSchema.parse(request.params)
+
+    const refeicao = await knex('refeicoes')
+      .select()
+      .where({ id, id_usuario: idUsuario })
+      .first()
+
+    const refeicaoResponse = {
+      ...refeicao,
+      dieta: !!refeicao?.dieta,
+    }
+
+    return { refeicao: refeicaoResponse }
   })
 }
