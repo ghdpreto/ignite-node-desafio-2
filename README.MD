@@ -1,3 +1,29 @@
+## Rodando o projeto
+
+Instalar as dependências
+
+``npm i``
+
+Compilar o projeto (PRD)
+
+``npm run build``
+
+Subir o projeto (PRD)
+
+``npm run start:prd``
+
+## Rodando os testes
+
+Instalar as dependências
+
+``npm i``
+
+Executar testes
+
+``npm run start:test``
+
+
+## TODOS
 - [X] Deve ser possível criar um usuário
 - [X] Deve ser possível fazer login
 - [X] Deve ser possível identificar o usuário entre as requisições

@@ -2,12 +2,14 @@
     "name": "ignite-node-desafio-2",
     "version": "1.0.0",
     "main": "index.js",
+    "engines": {
+        "node": "18"
+    },
     "scripts": {
-        "start:dev": "tsx watch src/server.ts",
-        "start:test": "vitest --threads false",
         "start:prd": "npm run knex -- migrate:latest && node dist/server.js",
-        "knex": "node --no-warnings --loader tsx ./node_modules/knex/bin/cli.js",
+        "start:test": "vitest --threads false",
         "build": "tsup src",
+        "knex": "node --no-warnings --loader tsx ./node_modules/knex/bin/cli.js",
         "lint": "eslint src --ex .ts --fix"
     },
     "keywords": [],
