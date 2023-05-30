@@ -4,7 +4,7 @@
     "main": "index.js",
     "scripts": {
         "start:dev": "tsx watch src/server.ts",
-        "start:test": "vitest",
+        "start:test": "vitest --threads false",
         "knex": "node --no-warnings --loader tsx ./node_modules/knex/bin/cli.js",
         "build": "tsup src",
         "lint": "eslint src --ex .ts --fix"
@@ -25,6 +25,7 @@
         "vitest": "^0.31.1"
     },
     "dependencies": {
+        "@fastify/cookie": "^8.3.0",
         "dotenv": "^16.0.3",
         "fastify": "^4.17.0",
         "knex": "^2.4.2",

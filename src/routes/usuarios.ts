@@ -46,6 +46,11 @@ export async function usuariosRoutes(app: FastifyInstance) {
       return reply.status(400).send({ mensagem: 'Usuário / senha inválidos' })
     }
 
+    reply.cookie('idUsuario', usuario.id, {
+      path: '/',
+      maxAge: 1000 * 60 * 1, // acho q 60 minutos (validar)
+    })
+
     return {
       usuario,
     }
